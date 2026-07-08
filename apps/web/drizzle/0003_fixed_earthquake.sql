@@ -1,0 +1,1 @@
+ALTER TABLE "reviews" ADD COLUMN "sibling_facts" jsonb;
