@@ -43,6 +43,20 @@
       "when": 1782991671274,
       "tag": "0005_omniscient_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783538624252,
+      "tag": "0006_awesome_lily_hollister",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783554642675,
+      "tag": "0007_keen_scarecrow",
+      "breakpoints": true
     }
   ]
 }

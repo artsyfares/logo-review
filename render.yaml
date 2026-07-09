@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: logoai-analysis
+    runtime: docker
+    plan: free
+    rootDir: services/analysis
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health

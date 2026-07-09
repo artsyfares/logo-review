@@ -33,7 +33,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans">
-        <ClerkProvider>
+        <ClerkProvider signInForceRedirectUrl="/projects" signUpForceRedirectUrl="/projects">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <AppHeader />
             {children}

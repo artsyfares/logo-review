@@ -9,9 +9,10 @@ export function ProjectSettings({
   project: {
     id: string;
     name: string;
-    brandOverview: string | null;
-    customerPersona: string | null;
-    valueProposition: string | null;
+    brandOverview: string;
+    customerPersona: string;
+    valueProposition: string;
+    brandReferences: string | null;
   };
 }) {
   return (
@@ -34,11 +35,11 @@ export function ProjectSettings({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            Brand overview{" "}
-            <span className="text-xs text-muted-foreground">(optional)</span>
+            Brand overview
             <textarea
               name="brandOverview"
-              defaultValue={project.brandOverview ?? ""}
+              defaultValue={project.brandOverview}
+              required
               rows={2}
               placeholder="What is this brand, what does it do, what's its personality?"
               className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
@@ -46,11 +47,11 @@ export function ProjectSettings({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            Customer persona{" "}
-            <span className="text-xs text-muted-foreground">(optional)</span>
+            Customer persona
             <textarea
               name="customerPersona"
-              defaultValue={project.customerPersona ?? ""}
+              defaultValue={project.customerPersona}
+              required
               rows={2}
               placeholder="Who is this logo for?"
               className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
@@ -58,13 +59,25 @@ export function ProjectSettings({
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
-            Value proposition{" "}
-            <span className="text-xs text-muted-foreground">(optional)</span>
+            Value proposition
             <textarea
               name="valueProposition"
-              defaultValue={project.valueProposition ?? ""}
+              defaultValue={project.valueProposition}
+              required
               rows={2}
               placeholder="What's the core promise/value this brand delivers?"
+              className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            Brand references{" "}
+            <span className="text-xs text-muted-foreground">(optional)</span>
+            <textarea
+              name="brandReferences"
+              defaultValue={project.brandReferences ?? ""}
+              rows={2}
+              placeholder="Brands you want this logo to feel similar to, and any you want to avoid looking like."
               className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
             />
           </label>

@@ -9,5 +9,6 @@ export * from "./review/presentation-kit.ts";
 export * from "./review/risk-flags.ts";
 export * from "./review/variant-guidance-item.ts";
 export * from "./review/color-narrative.ts";
+export * from "./review/brand-alignment.ts";
 export * from "./review/logo-review.ts";
 export * from "./facts/analysis-facts.ts";

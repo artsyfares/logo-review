@@ -5,6 +5,7 @@ import { logoReviewSchema } from "@logoai/shared";
 import { REVIEW_SYSTEM_PROMPT } from "../system-prompt";
 import { CHAT_SYSTEM_PROMPT } from "../chat-system-prompt";
 import { buildContextBlock, buildSiblingContextText } from "../build-context-block";
+import { withNetworkRetry } from "../with-network-retry";
 import type { AIReviewProvider, GenerateChatReplyInput, GenerateLogoReviewInput } from "./types";
 
 const MODEL = "claude-opus-4-8";
@@ -81,14 +82,16 @@ export function createAnthropicProvider(): AIReviewProvider {
         text: `Deterministic facts computed for this logo:\n\n${JSON.stringify(facts, null, 2)}`,
       });
 
-      const response = await getClient().messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: REVIEW_SYSTEM_PROMPT,
-        tools: [reviewTool],
-        tool_choice: { type: "tool", name: TOOL_NAME },
-        messages: [{ role: "user", content }],
-      });
+      const response = await withNetworkRetry(() =>
+        getClient().messages.create({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          system: REVIEW_SYSTEM_PROMPT,
+          tools: [reviewTool],
+          tool_choice: { type: "tool", name: TOOL_NAME },
+          messages: [{ role: "user", content }],
+        }),
+      );
 
       if (response.stop_reason === "refusal") {
         throw new Error("Review generation was declined by Claude's safety systems");
@@ -112,12 +115,14 @@ export function createAnthropicProvider(): AIReviewProvider {
     },
 
     async generateChatReply({ review, facts, messages }: GenerateChatReplyInput) {
-      const response = await getClient().messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: `${CHAT_SYSTEM_PROMPT}\n\nThe structured review already produced for this logo:\n\n${JSON.stringify(review, null, 2)}\n\nDeterministic facts it was based on:\n\n${JSON.stringify(facts, null, 2)}`,
-        messages: messages.map((message) => ({ role: message.role, content: message.content })),
-      });
+      const response = await withNetworkRetry(() =>
+        getClient().messages.create({
+          model: MODEL,
+          max_tokens: 1024,
+          system: `${CHAT_SYSTEM_PROMPT}\n\nThe structured review already produced for this logo:\n\n${JSON.stringify(review, null, 2)}\n\nDeterministic facts it was based on:\n\n${JSON.stringify(facts, null, 2)}`,
+          messages: messages.map((message) => ({ role: message.role, content: message.content })),
+        }),
+      );
 
       const textBlock = response.content.find((block) => block.type === "text");
       if (!textBlock || textBlock.type !== "text") {

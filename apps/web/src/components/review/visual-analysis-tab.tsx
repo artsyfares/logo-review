@@ -82,14 +82,6 @@ export function VisualAnalysisTab({
         </>
       )}
 
-      <Section title="Strengths">
-        <TextList items={review.strengths} />
-      </Section>
-
-      <Section title="Potential weaknesses">
-        <TextList items={review.weaknesses} />
-      </Section>
-
       {facts && (
         <>
           {hasBalance ? (

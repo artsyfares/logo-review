@@ -6,7 +6,7 @@ import { LogoScalabilityPreview } from "./logo-scalability-preview";
 import { ColorPaletteSwatches } from "./color-palette-swatches";
 import { LogoMonochromePreview } from "./logo-monochrome-preview";
 
-/** The 7 named performance cards: Legibility, Scalability, Originality, Color harmony, Misinterpretations, Brief match, Balance alignment. */
+/** The 6 named performance cards: Legibility, Scalability, Originality, Color harmony, Misinterpretations, Balance alignment. Brand-brief alignment gets its own dedicated section instead of a card here — see BrandAlignmentSection. */
 export function DetailedReviewSection({
   review,
   facts,
@@ -38,10 +38,6 @@ export function DetailedReviewSection({
       </div>
 
       <ScoredParagraph label="Misinterpretations" dimension={review.misinterpretationRisk} />
-
-      {review.briefAlignment && (
-        <ScoredParagraph label="Brief match" dimension={review.briefAlignment} />
-      )}
 
       <div className="flex flex-col gap-3">
         <ScoredParagraph label="Balance alignment" dimension={review.categoryScores.composition} />

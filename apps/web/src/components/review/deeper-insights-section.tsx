@@ -2,11 +2,17 @@ import type { AnalysisFacts, LogoReview, UseCaseReadiness } from "@logoai/shared
 import type { LogoType } from "@/lib/ai/providers/types";
 import { pickVariantFacts } from "@/lib/pick-variant-facts";
 import { LogoContextMockup, matchMockupType } from "./logo-context-mockup";
+import { TONE_CLASS, type Tone } from "@/lib/review/tone";
 
 const READINESS_LABEL: Record<UseCaseReadiness["readiness"], string> = {
   ready: "Ready",
   "needs-adjustment": "Needs adjustment",
   "not-suitable": "Not suitable",
+};
+const READINESS_TONE: Record<UseCaseReadiness["readiness"], Tone> = {
+  ready: "good",
+  "needs-adjustment": "warn",
+  "not-suitable": "bad",
 };
 
 function InsightGroup({ title, children }: { title: string; children: React.ReactNode }) {
@@ -45,8 +51,10 @@ export function DeeperInsightsSection({
                   </div>
                 )}
                 <div>
-                  <span className="font-medium">{usage.useCase}</span>{" "}
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                  <span className="mr-2 font-medium">{usage.useCase}</span>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${TONE_CLASS[READINESS_TONE[usage.readiness]]}`}
+                  >
                     {READINESS_LABEL[usage.readiness]}
                   </span>
                   <p className="text-muted-foreground">{usage.note}</p>

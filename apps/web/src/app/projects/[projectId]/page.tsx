@@ -8,6 +8,9 @@ import { logoAssets, projects, reviewMessages, reviews } from "@/db/schema";
 import { LogoUploader } from "@/components/logo-uploader";
 import { LogoReviewDisplay } from "@/components/review/logo-review-display";
 import { VisualAnalysisTab } from "@/components/review/visual-analysis-tab";
+import { ExecutiveSummarySection } from "@/components/review/executive-summary-section";
+import { BrandAlignmentTab } from "@/components/review/brand-alignment-section";
+import { StuckPendingNotice } from "@/components/review/stuck-pending-notice";
 import { ReviewTabs } from "@/components/review/review-tabs";
 import { ChatSidePanel } from "@/components/review/chat-side-panel";
 import { FullReportExportButton } from "@/components/review/full-report-export-button";
@@ -39,6 +42,7 @@ export default async function ProjectPage({
       brandOverview: projects.brandOverview,
       customerPersona: projects.customerPersona,
       valueProposition: projects.valueProposition,
+      brandReferences: projects.brandReferences,
     })
     .from(projects)
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
@@ -86,6 +90,14 @@ export default async function ProjectPage({
     .orderBy(desc(reviews.createdAt));
 
   const review = projectReviews[0] ?? null;
+  // The most recent *complete* review before the one being displayed —
+  // powers the "since your last review" diff. Skipped if the currently
+  // displayed review is itself not complete (nothing meaningful to diff
+  // against yet) or predates the current report shape.
+  const previousReview =
+    review?.status === "complete"
+      ? (projectReviews.slice(1).find((r) => r.status === "complete" && r.reviewData) ?? null)
+      : null;
 
   const messages = review
     ? await db
@@ -158,10 +170,16 @@ export default async function ProjectPage({
       )}
 
       {review?.status === "pending" && (
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <RefreshCw size={12} className="animate-spin" />
-          Generating review…
-        </p>
+        <div className="flex flex-col items-start gap-2">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <RefreshCw size={12} className="animate-spin" />
+            Generating review…
+          </p>
+          <StuckPendingNotice
+            createdAt={review.createdAt}
+            action={generateReview.bind(null, project.id)}
+          />
+        </div>
       )}
 
       {review?.status === "failed" && (
@@ -200,6 +218,24 @@ export default async function ProjectPage({
             </form>
           </div>
           <ReviewTabs
+            summaryTab={
+              <ExecutiveSummarySection
+                review={review.reviewData}
+                facts={review.facts}
+                siblingFacts={review.siblingFacts}
+                previousReview={previousReview?.reviewData}
+                previousCreatedAt={previousReview?.createdAt}
+              />
+            }
+            brandAlignmentTab={
+              // The three per-aspect fits are newer than `brandAlignment`
+              // itself — a review generated between those two additions
+              // would have the field but not its sub-fits, so check for the
+              // sub-fit specifically rather than crashing on it being absent.
+              review.reviewData.brandAlignment?.brandOverviewFit ? (
+                <BrandAlignmentTab brandAlignment={review.reviewData.brandAlignment} />
+              ) : undefined
+            }
             reportTab={
               <LogoReviewDisplay
                 review={review.reviewData}

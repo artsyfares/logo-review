@@ -7,6 +7,7 @@ import { CHAT_SYSTEM_PROMPT } from "../chat-system-prompt";
 import { buildContextBlock, buildSiblingContextText } from "../build-context-block";
 import { normalizePrinciplesInReview } from "./normalize-principles";
 import { simplifySchemaForGemini } from "./simplify-schema-for-gemini";
+import { withNetworkRetry } from "../with-network-retry";
 import type { AIReviewProvider, GenerateChatReplyInput, GenerateLogoReviewInput } from "./types";
 
 const DEFAULT_MODEL = "gemini-2.5-flash"; // override via GEMINI_MODEL
@@ -69,15 +70,17 @@ export function createGeminiProvider(): AIReviewProvider {
         text: `Deterministic facts computed for this logo:\n\n${JSON.stringify(facts, null, 2)}`,
       });
 
-      const response = await getClient().models.generateContent({
-        model,
-        contents: [{ role: "user", parts }],
-        config: {
-          systemInstruction: REVIEW_SYSTEM_PROMPT,
-          responseMimeType: "application/json",
-          responseJsonSchema: reviewJsonSchema,
-        },
-      });
+      const response = await withNetworkRetry(() =>
+        getClient().models.generateContent({
+          model,
+          contents: [{ role: "user", parts }],
+          config: {
+            systemInstruction: REVIEW_SYSTEM_PROMPT,
+            responseMimeType: "application/json",
+            responseJsonSchema: reviewJsonSchema,
+          },
+        }),
+      );
 
       const text = response.text;
       if (!text) {
@@ -108,16 +111,18 @@ export function createGeminiProvider(): AIReviewProvider {
     async generateChatReply({ review, facts, messages }: GenerateChatReplyInput) {
       const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
 
-      const response = await getClient().models.generateContent({
-        model,
-        contents: messages.map((message) => ({
-          role: message.role === "assistant" ? "model" : "user",
-          parts: [{ text: message.content }],
-        })),
-        config: {
-          systemInstruction: `${CHAT_SYSTEM_PROMPT}\n\nThe structured review already produced for this logo:\n\n${JSON.stringify(review, null, 2)}\n\nDeterministic facts it was based on:\n\n${JSON.stringify(facts, null, 2)}`,
-        },
-      });
+      const response = await withNetworkRetry(() =>
+        getClient().models.generateContent({
+          model,
+          contents: messages.map((message) => ({
+            role: message.role === "assistant" ? "model" : "user",
+            parts: [{ text: message.content }],
+          })),
+          config: {
+            systemInstruction: `${CHAT_SYSTEM_PROMPT}\n\nThe structured review already produced for this logo:\n\n${JSON.stringify(review, null, 2)}\n\nDeterministic facts it was based on:\n\n${JSON.stringify(facts, null, 2)}`,
+          },
+        }),
+      );
 
       const text = response.text;
       if (!text) {

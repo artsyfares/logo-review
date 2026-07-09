@@ -31,13 +31,22 @@ export const projects = pgTable("projects", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  // Optional brand context — considered by the AI when present (see
-  // `briefAlignment` in packages/shared's review schema), skipped entirely
-  // when absent rather than forcing the model to reason about a brief that
-  // was never given.
-  brandOverview: text("brand_overview"),
-  customerPersona: text("customer_persona"),
-  valueProposition: text("value_proposition"),
+  // Mandatory brand context, collected at project creation — feeds
+  // `brandAlignment` in packages/shared's review schema. Was optional
+  // (nullable) until ROADMAP.md 1.9m; existing rows were backfilled with a
+  // placeholder before this NOT NULL constraint was added.
+  brandOverview: text("brand_overview").notNull(),
+  customerPersona: text("customer_persona").notNull(),
+  valueProposition: text("value_proposition").notNull(),
+  // Optional — free text naming brands the designer wants this logo to feel
+  // similar to, or to avoid resembling. Kept optional (unlike the three
+  // above) since it adds real value but isn't essential to generate a
+  // review, and mandating a 4th field at creation risks friction for
+  // designers who don't have concrete references in mind yet. Gives the AI
+  // concrete visual anchors instead of relying solely on prose personality
+  // descriptions, which are a weak signal for a visual medium — see
+  // ROADMAP.md 1.9o.
+  brandReferences: text("brand_references"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

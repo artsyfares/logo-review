@@ -1,9 +1,4 @@
-function ringColor(score: number): string {
-  if (score >= 80) return "#10b981"; // emerald-500
-  if (score >= 60) return "#6366f1"; // indigo-500
-  if (score >= 40) return "#f59e0b"; // amber-500
-  return "#ef4444"; // red-500
-}
+import { TONE_HEX, scoreTone } from "@/lib/review/tone";
 
 /** Circular score-out-of-100 indicator — pure SVG, no chart library. */
 export function ScoreRing({ score, size = 48 }: { score: number; size?: number }) {
@@ -35,7 +30,7 @@ export function ScoreRing({ score, size = 48 }: { score: number; size?: number }
         cy={center}
         r={radius}
         fill="none"
-        stroke={ringColor(score)}
+        stroke={TONE_HEX[scoreTone(score)]}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeDasharray={circumference}

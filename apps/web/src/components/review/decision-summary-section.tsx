@@ -1,20 +1,7 @@
 import type { AnalysisFacts } from "@logoai/shared";
 import type { LogoType } from "@/lib/ai/providers/types";
 import { pickVariantFacts } from "@/lib/pick-variant-facts";
-
-type Tone = "good" | "warn" | "bad";
-
-const TONE_CLASS: Record<Tone, string> = {
-  good: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  warn: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  bad: "border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-400",
-};
-
-const TONE_LABEL: Record<Tone, string> = {
-  good: "Ready",
-  warn: "Needs attention",
-  bad: "Needs work",
-};
+import { TONE_CLASS, TONE_LABEL, type Tone } from "@/lib/review/tone";
 
 interface Verdict {
   title: string;
@@ -53,7 +40,7 @@ function contrastVerdict(facts: AnalysisFacts): Verdict | null {
   return { title: "Accessible contrast", tone: "bad", reasoning: `Dominant ink color (${dominant.hex}) only reaches a ${ratio.toFixed(1)}:1 contrast ratio against ${against} — below WCAG AA (4.5:1), risky for any text role.` };
 }
 
-function balanceVerdict(facts: AnalysisFacts): Verdict | null {
+export function balanceVerdict(facts: AnalysisFacts): Verdict | null {
   const centerOfMass = facts.balance?.center_of_mass;
   if (!centerOfMass) return null;
 

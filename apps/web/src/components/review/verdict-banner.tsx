@@ -1,16 +1,16 @@
 import type { LogoReview } from "@logoai/shared";
 import { sortActionPlanByPriority } from "./action-plan-section";
+import { TONE_CLASS, type Tone, scoreTone } from "@/lib/review/tone";
 
-const TONE_CLASS = {
-  good: "border-emerald-500/40 bg-emerald-500/10",
-  warn: "border-amber-500/40 bg-amber-500/10",
-  bad: "border-red-500/40 bg-red-500/10",
-} as const;
+const VERDICT_LABEL: Record<Tone, string> = {
+  good: "Ready to present",
+  warn: "Close — needs targeted fixes before presenting",
+  bad: "Not ready — needs significant revision",
+};
 
-function getVerdict(score: number): { label: string; tone: keyof typeof TONE_CLASS } {
-  if (score >= 80) return { label: "Ready to present", tone: "good" };
-  if (score >= 60) return { label: "Close — needs targeted fixes before presenting", tone: "warn" };
-  return { label: "Not ready — needs significant revision", tone: "bad" };
+function getVerdict(score: number): { label: string; tone: Tone } {
+  const tone = scoreTone(score);
+  return { label: VERDICT_LABEL[tone], tone };
 }
 
 /** The one-line TL;DR a busy stakeholder reads before anything else. */

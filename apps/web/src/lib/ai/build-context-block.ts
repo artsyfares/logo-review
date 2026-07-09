@@ -8,28 +8,26 @@ const LOGO_TYPE_NOTE: Record<LogoType, string> = {
   icon: "This is an ICON/symbol-only mark — weight legibility and recognizability at very small sizes (favicons, app icons, social avatars) heavily; typography and wordmark-specific feedback don't apply unless the icon contains lettering.",
 };
 
-/** Text block appended to the AI's user message — logo-type framing plus the optional brief. */
-export function buildContextBlock(logoType: LogoType, brandContext: BrandContext | null): string {
-  const parts = [LOGO_TYPE_NOTE[logoType]];
+/** Text block appended to the AI's user message — logo-type framing plus the mandatory brief. */
+export function buildContextBlock(logoType: LogoType, brandContext: BrandContext): string {
+  const briefLines = [
+    `Brand overview: ${brandContext.brandOverview}`,
+    `Customer persona: ${brandContext.customerPersona}`,
+    `Value proposition: ${brandContext.valueProposition}`,
+  ];
+  if (brandContext.brandReferences) {
+    briefLines.push(`Brand references (brands to feel similar to, or to avoid): ${brandContext.brandReferences}`);
+  }
 
-  if (
-    brandContext &&
-    (brandContext.brandOverview || brandContext.customerPersona || brandContext.valueProposition)
-  ) {
+  const parts = [
+    LOGO_TYPE_NOTE[logoType],
+    "The designer provided this brief — use it to fill `brandAlignment` and to inform tone/personality judgments elsewhere; do not invent details beyond it:",
+    briefLines.join("\n"),
+  ];
+  if (brandContext.brandReferences) {
     parts.push(
-      "The designer provided this brief — use it to fill `briefAlignment` and to inform tone/personality judgments elsewhere; do not invent details beyond it:",
-      [
-        brandContext.brandOverview ? `Brand overview: ${brandContext.brandOverview}` : null,
-        brandContext.customerPersona ? `Customer persona: ${brandContext.customerPersona}` : null,
-        brandContext.valueProposition
-          ? `Value proposition: ${brandContext.valueProposition}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join("\n"),
+      "Weigh the brand references concretely wherever visual style/tone is being judged (`brandOverviewFit`, color/typography/shape commentary, redesign directions) — treat them as a second, more concrete lens on the same brief, not a separate wishlist. If this mark reads like a brand named as one to avoid, or fails to read like ones it should resemble, say so explicitly.",
     );
-  } else {
-    parts.push("No brief was provided — set `briefAlignment` to null rather than guessing at one.");
   }
 
   return parts.join("\n\n");

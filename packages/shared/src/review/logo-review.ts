@@ -9,6 +9,7 @@ import { presentationKitSchema } from "./presentation-kit.ts";
 import { riskFlagsSchema } from "./risk-flags.ts";
 import { variantGuidanceItemSchema } from "./variant-guidance-item.ts";
 import { colorNarrativeSchema } from "./color-narrative.ts";
+import { brandAlignmentSchema } from "./brand-alignment.ts";
 
 /**
  * Scored dimensions from docs/PRODUCT_VISION.md's analysis list that are
@@ -51,11 +52,11 @@ export const logoReviewSchema = z.object({
   /** Risk the mark is misread or misinterpreted (a distinct symbol, a different word, an unintended shape). */
   misinterpretationRisk: scoredDimensionSchema,
   /**
-   * How well the logo matches the brand overview/persona/value proposition
-   * the designer optionally provided — null when no brief was given, rather
-   * than forcing a judgment against a brief that doesn't exist.
+   * How well the logo matches the mandatory brand brief (overview, customer
+   * persona, value proposition) provided at project creation, plus concrete
+   * keep/modify guidance — see docs/PRODUCT_VISION.md and ROADMAP.md 1.9m.
    */
-  briefAlignment: scoredDimensionSchema.nullable(),
+  brandAlignment: brandAlignmentSchema,
 
   /** Prioritized "what to fix first," surfaced ahead of the full detailed breakdown. */
   actionPlan: z.array(actionPlanItemSchema).min(1),

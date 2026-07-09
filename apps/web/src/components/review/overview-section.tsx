@@ -24,7 +24,19 @@ export function OverviewSection({ review }: { review: LogoReview }) {
       <OverviewMetric label="Color harmony" dimension={review.categoryScores.colorPalette} />
       <OverviewMetric label="Misinterpretations" dimension={review.misinterpretationRisk} />
       <OverviewMetric label="Balance alignment" dimension={review.categoryScores.composition} />
-      <OverviewMetric label="Brief match" dimension={review.briefAlignment} />
+      <OverviewMetric
+        label="Brand fit"
+        dimension={
+          review.brandAlignment
+            ? {
+                score: review.brandAlignment.score,
+                confidence: review.brandAlignment.confidence,
+                reasoning: review.brandAlignment.summary,
+                principles: review.brandAlignment.principles,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

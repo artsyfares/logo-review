@@ -29,16 +29,30 @@ function isLogoType(value: unknown): value is LogoType {
   return typeof value === "string" && (LOGO_TYPES as readonly string[]).includes(value);
 }
 
+/**
+ * Brand context is mandatory from project creation onward (ROADMAP.md
+ * 1.9m) — every review needs a real brief to grade `brandAlignment`
+ * against, and collecting it upfront beats discovering mid-review that
+ * it's missing.
+ */
 export async function createProject(formData: FormData): Promise<void> {
   const { id: userId } = await ensureCurrentUser();
   const name = String(formData.get("name") ?? "").trim();
+  const brandOverview = String(formData.get("brandOverview") ?? "").trim();
+  const customerPersona = String(formData.get("customerPersona") ?? "").trim();
+  const valueProposition = String(formData.get("valueProposition") ?? "").trim();
+  const brandReferences = String(formData.get("brandReferences") ?? "").trim() || null;
+
   if (!name) {
     throw new Error("Project name is required");
+  }
+  if (!brandOverview || !customerPersona || !valueProposition) {
+    throw new Error("Brand overview, customer persona, and value proposition are all required");
   }
 
   const [project] = await db
     .insert(projects)
-    .values({ userId, name })
+    .values({ userId, name, brandOverview, customerPersona, valueProposition, brandReferences })
     .returning({ id: projects.id });
 
   revalidatePath("/projects");
@@ -56,6 +70,7 @@ async function requireOwnedProject(projectId: string, userId: string) {
       brandOverview: projects.brandOverview,
       customerPersona: projects.customerPersona,
       valueProposition: projects.valueProposition,
+      brandReferences: projects.brandReferences,
     })
     .from(projects)
     .where(eq(projects.id, projectId));
@@ -65,7 +80,7 @@ async function requireOwnedProject(projectId: string, userId: string) {
   return project;
 }
 
-/** Rename a project and/or set its optional brand context — see ROADMAP.md 1.9c. */
+/** Rename a project and/or update its brand context — see ROADMAP.md 1.9c/1.9m/1.9o. */
 export async function updateProject(projectId: string, formData: FormData): Promise<void> {
   const { userId } = await auth();
   if (!userId) {
@@ -74,16 +89,28 @@ export async function updateProject(projectId: string, formData: FormData): Prom
   await requireOwnedProject(projectId, userId);
 
   const name = String(formData.get("name") ?? "").trim();
+  const brandOverview = String(formData.get("brandOverview") ?? "").trim();
+  const customerPersona = String(formData.get("customerPersona") ?? "").trim();
+  const valueProposition = String(formData.get("valueProposition") ?? "").trim();
+  const brandReferences = String(formData.get("brandReferences") ?? "").trim() || null;
+
   if (!name) {
     throw new Error("Project name is required");
   }
-  const brandOverview = String(formData.get("brandOverview") ?? "").trim() || null;
-  const customerPersona = String(formData.get("customerPersona") ?? "").trim() || null;
-  const valueProposition = String(formData.get("valueProposition") ?? "").trim() || null;
+  if (!brandOverview || !customerPersona || !valueProposition) {
+    throw new Error("Brand overview, customer persona, and value proposition are all required");
+  }
 
   await db
     .update(projects)
-    .set({ name, brandOverview, customerPersona, valueProposition, updatedAt: new Date() })
+    .set({
+      name,
+      brandOverview,
+      customerPersona,
+      valueProposition,
+      brandReferences,
+      updatedAt: new Date(),
+    })
     .where(eq(projects.id, projectId));
 
   revalidatePath(`/projects/${projectId}`);
@@ -307,6 +334,7 @@ export async function generateReview(projectId: string): Promise<void> {
         brandOverview: project.brandOverview,
         customerPersona: project.customerPersona,
         valueProposition: project.valueProposition,
+        brandReferences: project.brandReferences,
       },
       siblingVariants,
     });
@@ -321,7 +349,13 @@ export async function generateReview(projectId: string): Promise<void> {
       .where(eq(reviews.id, review.id));
   } catch (err) {
     await db.update(reviews).set({ status: "failed" }).where(eq(reviews.id, review.id));
-    throw err;
+    // Deliberately not re-thrown: the row above is already marked "failed",
+    // and the page's own status-driven UI (a "Review generation failed /
+    // Retry" block) is the intended way to surface this — re-throwing here
+    // instead crashed the whole page with Next.js's raw error overlay on
+    // every transient network hiccup calling the AI provider, hiding the
+    // graceful path that already existed for exactly this case.
+    console.error("generateReview failed", err);
   }
 
   revalidatePath(`/projects/${project.id}`);

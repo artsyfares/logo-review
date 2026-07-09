@@ -49,16 +49,46 @@ export default async function ProjectsPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
       <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
 
-      <form action={createProject} className="flex gap-2">
+      <form action={createProject} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
         <input
           name="name"
           placeholder="New project name"
           required
-          className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        />
+        <p className="text-xs text-muted-foreground">
+          A brief is required so the review can judge brand fit, not just visual quality on its own.
+        </p>
+        <textarea
+          name="brandOverview"
+          placeholder="Brand overview — what is this brand, what does it do, what's its personality?"
+          required
+          rows={2}
+          className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        />
+        <textarea
+          name="customerPersona"
+          placeholder="Customer persona — who is this logo for?"
+          required
+          rows={2}
+          className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        />
+        <textarea
+          name="valueProposition"
+          placeholder="Value proposition — what's the core promise/value this brand delivers?"
+          required
+          rows={2}
+          className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        />
+        <textarea
+          name="brandReferences"
+          placeholder="Brand references (optional) — brands you want this logo to feel similar to, and any to avoid looking like."
+          rows={2}
+          className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
         />
         <SubmitButton
           pendingLabel="Creating…"
-          className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+          className="flex items-center gap-1.5 self-start rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
         >
           <Plus size={16} />
           Create

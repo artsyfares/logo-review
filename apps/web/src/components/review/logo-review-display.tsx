@@ -13,6 +13,7 @@ import { VariantGuidanceSection } from "./variant-guidance-section";
 import { TextList } from "./text-list";
 import { ReportSection as Section } from "./report-section";
 import type { LogoType } from "@/lib/ai/providers/types";
+import { hasFullReportData } from "@/lib/review/has-full-report-data";
 
 export function LogoReviewDisplay({
   review,
@@ -25,20 +26,10 @@ export function LogoReviewDisplay({
   logoType?: LogoType;
   siblingFacts?: Partial<Record<LogoType, AnalysisFacts>> | null;
 }) {
-  // Reviews generated before this report format was added lack these fields
-  // entirely (the DB doesn't re-validate stored jsonb against the current
-  // schema) — render what's still valid rather than crashing on a missing
-  // required array. Checked independently per-field (not one all-or-nothing
-  // flag) so a review that predates only the *newest* field (riskFlags)
-  // still gets every other section instead of being fully downgraded.
-  const hasFullReportData = Boolean(
-    review.actionPlan &&
-      review.realWorldUsage &&
-      review.marketFit &&
-      review.deliveryChecklist &&
-      review.presentationKit &&
-      review.misinterpretationRisk,
-  );
+  // Checked independently per-field (not one all-or-nothing flag) so a
+  // review that predates only the *newest* field (riskFlags) still gets
+  // every other section instead of being fully downgraded.
+  const hasFullReport = hasFullReportData(review);
 
   return (
     <article id="report-tab-root" className="flex flex-col gap-5 bg-background">
@@ -48,18 +39,18 @@ export function LogoReviewDisplay({
         </div>
       )}
 
-      {hasFullReportData && <VerdictBanner review={review} />}
+      {hasFullReport && <VerdictBanner review={review} />}
 
       <p className="text-base leading-relaxed">{review.executiveSummary}</p>
 
-      {!hasFullReportData && (
+      {!hasFullReport && (
         <p className="rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
           This review predates the current report format (overview, action plan, detailed cards,
           deeper insights). Regenerate it to see the full report.
         </p>
       )}
 
-      {hasFullReportData && (
+      {hasFullReport && (
         <>
           <ReportNav
             hasRiskFlags={Boolean(review.riskFlags)}

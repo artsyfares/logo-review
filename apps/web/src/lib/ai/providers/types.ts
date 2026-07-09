@@ -7,12 +7,13 @@ export type SupportedImageMediaType = "image/png" | "image/jpeg" | "image/gif" |
 
 export type LogoType = "primary" | "secondary" | "icon";
 
-/** Optional, designer-provided brief — considered when present, otherwise
- * `briefAlignment` on the resulting review is null rather than guessed at. */
+/** Mandatory brand brief, collected at project creation — feeds `brandAlignment` on the resulting review. */
 export interface BrandContext {
-  brandOverview?: string | null;
-  customerPersona?: string | null;
-  valueProposition?: string | null;
+  brandOverview: string;
+  customerPersona: string;
+  valueProposition: string;
+  /** Optional — brands the designer wants this logo to feel similar to, or to avoid. */
+  brandReferences: string | null;
 }
 
 /** Another uploaded variant of the SAME logo/brand (e.g. the icon, when reviewing the primary mark). */
@@ -27,7 +28,7 @@ export interface GenerateLogoReviewInput {
   imageMediaType: SupportedImageMediaType;
   facts: AnalysisFacts;
   logoType: LogoType;
-  brandContext: BrandContext | null;
+  brandContext: BrandContext;
   /** Other primary/secondary/icon variants uploaded to the same project, if any — treat as one logo family. */
   siblingVariants: SiblingVariant[];
 }
